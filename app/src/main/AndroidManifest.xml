@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.example.binghu.router">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".module.ModuleA"
+            android:exported="false"
+            android:label="ModuleA">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <!-- FIXME if we write data here, maybe not secure, anyone can see this -->
+
+                <data
+                    android:host="ecovacs"
+                    android:path="/moduleA"
+                    android:scheme="native"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".module.ModuleB"
+            android:exported="false"
+            android:label="ModuleB">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data
+                    android:host="ecovacs"
+                    android:path="/moduleB"
+                    android:scheme="native"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".EntryActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".router.RouterActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
+        <activity
+            android:name=".module.ModuleURL"
+            android:label="Url Module"
+            android:exported="false"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data
+                    android:host="ecovacs"
+                    android:path="/moduleUrl"
+                    android:scheme="native"/>
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
