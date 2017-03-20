@@ -8,8 +8,10 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * Created by binghu on 3/6/17.
@@ -178,4 +180,15 @@ public enum Router implements IRouter {
 			}
 		}
 	}
+	
+	 public void open() {
+		 try {
+			 Class<IModule>[] inters = (Class<IModule>[]) Class.forName("com.example.binghu.router.module.ModuleA").getSuperclass().getInterfaces();
+			 Log.e(TAG, "boolean " + inters[0].newInstance().interceptor());
+			 Type[] types = Class.forName("com.example.binghu.router.module.ModuleA").getGenericInterfaces();
+		 } catch (Exception e) {
+			 e.printStackTrace();
+		 }
+		
+	 }
 }
