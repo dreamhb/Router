@@ -21,9 +21,9 @@
                 <!-- FIXME if we write data here, maybe not secure, anyone can see this -->
 
                 <data
-                    android:host="ecovacs"
-                    android:path="/moduleA"
-                    android:scheme="native"/>
+                    android:host="moduleA"
+                    android:path="/classA"
+                    android:scheme="eco"/>
             </intent-filter>
         </activity>
         <activity
@@ -36,9 +36,9 @@
                 <category android:name="android.intent.category.DEFAULT"/>
 
                 <data
-                    android:host="ecovacs"
-                    android:path="/moduleB"
-                    android:scheme="native"/>
+                    android:host="moduleB"
+                    android:path="/classB"
+                    android:scheme="eco"/>
             </intent-filter>
         </activity>
         <activity android:name=".EntryActivity">
@@ -65,9 +65,9 @@
                 <category android:name="android.intent.category.DEFAULT"/>
 
                 <data
-                    android:host="ecovacs"
-                    android:path="/moduleUrl"
-                    android:scheme="native"/>
+                    android:host="moduleUrl"
+                    android:path="/classUrl"
+                    android:scheme="eco"/>
             </intent-filter>
         </activity>
     </application>

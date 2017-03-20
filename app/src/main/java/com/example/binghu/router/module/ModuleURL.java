@@ -29,7 +29,7 @@ public class ModuleURL extends AppCompatActivity {
 		webView.registerHandler("pageJump", new BridgeHandler() {
 			@Override
 			public void handler(String data, final CallBackFunction function) {
-				Router.INSTANCE.openUrl(ModuleURL.this, data, new ResultCallback() {
+				Router.INSTANCE.open(ModuleURL.this, data, new ResultCallback() {
 					@Override
 					public void onResult(Bundle result) {
 						Toast.makeText(ModuleURL.this, result.getString("tips"), Toast.LENGTH_SHORT).show();

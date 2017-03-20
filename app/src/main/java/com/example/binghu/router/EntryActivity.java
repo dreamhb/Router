@@ -20,7 +20,7 @@ public class EntryActivity extends AppCompatActivity implements View.OnClickList
 	public void onClick(View view) {
 		switch (view.getId()) {
 			case R.id.btn_module_a:
-				Router.INSTANCE.openUrl(this, "native://ecovacs/moduleA?one=1&two=2&three=3", new ResultCallback() {
+				Router.INSTANCE.open(this, "eco://moduleA/classA?one=1&two=2&three=3", new ResultCallback() {
 					@Override
 					public void onResult(Bundle result) {
 						Toast.makeText(EntryActivity.this, result.getString("tips"), Toast.LENGTH_SHORT).show();
@@ -28,10 +28,10 @@ public class EntryActivity extends AppCompatActivity implements View.OnClickList
 				});
 				break;
 			case R.id.btn_module_b:
-				Router.INSTANCE.openUrl(this, "native://ecovacs/moduleB?girl=love&love=forever");
+				Router.INSTANCE.open(this, "eco://moduleB/classB?girl=love&love=forever");
 				break;
 			case R.id.btn_module_url:
-				Router.INSTANCE.openUrl(this, "native://ecovacs/moduleUrl?url=http://10.88.98.44:8080/router/");
+				Router.INSTANCE.open(this, "eco://moduleUrl/classUrl?url=http://10.88.98.44:8080/router/");
 				break;
 		}
 	}

@@ -15,7 +15,7 @@ import java.util.Map;
  * Created by binghu on 3/6/17.
  */
 
-public enum  Router implements RouterInterceptor {
+public enum Router implements IRouter {
 
 	INSTANCE;
 
@@ -26,20 +26,24 @@ public enum  Router implements RouterInterceptor {
 	private ResultCallback resultCallback;
 	static final int REQUEST_CODE_GET_RESULT = 0x3000;
 
-	@Override
-	public Uri getUri(Uri origin) {
+	/**
+	 * 动态匹配模块名和类名
+	 * @param origin
+	 * @return
+	 */
+	private Uri getUri(Uri origin) {
 		if (serverRouterMap != null) {
-			//get host
-			String host = serverRouterMap.get(origin.getHost()) == null ? origin.getHost():
+			//get module
+			String module = serverRouterMap.get(origin.getHost()) == null ? origin.getHost():
 					serverRouterMap.get(origin.getHost());
-			//get path
-			String path = serverRouterMap.get(origin.getPath()) == null ? origin.getPath():
+			//get class
+			String clazz = serverRouterMap.get(origin.getPath()) == null ? origin.getPath():
 					serverRouterMap.get(origin.getPath());
 
 			return new Uri.Builder()
 					.scheme(origin.getScheme())
-					.authority(host)
-					.path(path)
+					.authority(module)
+					.path(clazz)
 					.query(origin.getQuery())
 					.fragment(origin.getFragment())
 					.build();
@@ -49,8 +53,11 @@ public enum  Router implements RouterInterceptor {
 		}
 	}
 
-	@Override
-	public void initRouterConfig() {
+	/**
+	 * 初始化动态的router配置表,
+	 * 如果没有就要从服务器获取
+	 */
+	private void initRouterConfig() {
 		//get config from server
 		if (null == serverRouterMap) {
 			getServerRouterMap();
@@ -73,8 +80,9 @@ public enum  Router implements RouterInterceptor {
 	 * @param context
 	 * @param url schema://host/path?params#fragment
 	 */
-	public void openUrl(Context context, String url) {
-		openUrl(context, url, null);
+	@Override
+	public void open(Context context, String url) {
+		open(context, url, null);
 	}
 
 
@@ -84,7 +92,8 @@ public enum  Router implements RouterInterceptor {
 	 * @param url
 	 * @param resultCallback callback for get result
 	 */
-	public void openUrl(Context context, String url, ResultCallback resultCallback) {
+	@Override
+	public void open(Context context, String url, ResultCallback resultCallback) {
 
 		if (!checkUrl(url, context)) {
 			return;
@@ -117,6 +126,7 @@ public enum  Router implements RouterInterceptor {
 		}
 
 		if(!checkMatchModule(url, context)) {
+			//// TODO: 3/13/17 goto 404 page 
 			Log.e(TAG, " url is invalid or the module you called is not ready !");
 			return false;
 		}
