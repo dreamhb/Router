@@ -21,13 +21,12 @@ public class EntryActivity extends AppCompatActivity implements View.OnClickList
 	public void onClick(View view) {
 		switch (view.getId()) {
 			case R.id.btn_module_a:
-//				Router.INSTANCE.open(this, "eco://moduleA/classA?one=1&two=2&three=3", new ResultCallback() {
-//					@Override
-//					public void onResult(Bundle result) {
-//						Toast.makeText(EntryActivity.this, result.getString("tips"), Toast.LENGTH_SHORT).show();
-//					}
-//				});
-				Router.INSTANCE.open();
+				Router.INSTANCE.open(this, "eco://moduleA/classA?one=1&two=2&three=3", new ResultCallback() {
+					@Override
+					public void onResult(Bundle result) {
+						Toast.makeText(EntryActivity.this, result.getString("tips"), Toast.LENGTH_SHORT).show();
+					}
+				});
 				break;
 			case R.id.btn_module_b:
 				Router.INSTANCE.open(this, "eco://moduleB/classB?girl=love&love=forever");

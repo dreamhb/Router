@@ -1,5 +1,6 @@
 package com.example.binghu.router.module;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,7 +33,7 @@ public class ModuleA extends AbsModule implements View.OnClickListener {
 	}
 	
 	@Override
-	public boolean interceptor() {
+	public boolean intercept(Context context) {
 		return true;
 	}
 }

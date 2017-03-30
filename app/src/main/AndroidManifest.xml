@@ -53,12 +53,10 @@
             android:exported="false"
             android:launchMode="singleTop"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
-
         <activity
             android:name=".module.ModuleURL"
-            android:label="Url Module"
             android:exported="false"
-            >
+            android:label="Url Module">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -68,6 +66,21 @@
                     android:host="moduleUrl"
                     android:path="/classUrl"
                     android:scheme="eco"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".module.ModuleAM"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <!-- FIXME if we write data here, maybe not secure, anyone can see this -->
+                <data
+                    android:host="moduleA"
+                    android:path="/mPath"
+                    android:scheme="m"/>
             </intent-filter>
         </activity>
     </application>

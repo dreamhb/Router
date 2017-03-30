@@ -8,7 +8,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -103,16 +104,19 @@ public enum Router implements IRouter {
 
 		this.resultCallback = resultCallback;
 
-		Uri uri = Uri.parse(url);
-		Uri handledUri = getUri(uri);
+		intercept(getModuleFullName(url, context), context.getApplicationContext());
 
-		if (null != resultCallback) {
-			startRouterActivity(context, handledUri);
-		} else {
-			Intent intent = new Intent(Intent.ACTION_MAIN);
-			intent.setData(handledUri);
-			context.startActivity(intent);
-		}
+//		Uri uri = Uri.parse(url);
+//		Uri handledUri = getUri(uri);
+//
+//		// ----------JUMP---------------------------------
+//		if (null != resultCallback) {
+//			startRouterActivity(context, handledUri);
+//		} else {
+//			Intent intent = new Intent(Intent.ACTION_MAIN);
+//			intent.setData(handledUri);
+//			context.startActivity(intent);
+//		}
 	}
 
 
@@ -180,15 +184,70 @@ public enum Router implements IRouter {
 			}
 		}
 	}
-	
-	 public void open() {
+
+	/**
+	 *
+	 * @param url
+	 * @param context
+	 * @return
+	 */
+	private String getModuleFullName(String url, Context context) {
+		Uri origin = Uri.parse(url);
+		Uri moduleUri = new Uri.Builder()
+				.authority(origin.getAuthority())
+				.scheme("m")
+				.path("mPath")
+				.build();
+
+		Intent intent = new Intent();
+		intent.setData(moduleUri);
+
+		//// TODO: 3/30/17  add for test 
+		context.startActivity(intent);
+		
+		PackageManager pm = context.getPackageManager();
+		List<ResolveInfo> rls = pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
+
+		if (null == rls || rls.size() == 0) {
+			//// TODO: 3/30/17 error handler
+			handleError();
+		} else if (rls.size() > 1){
+			handleError();
+		} else {
+			ResolveInfo ri = rls.get(0);
+			String fullName = ri.activityInfo.name;
+			return fullName;
+		}
+
+		return "";
+	 }
+
+
+	 private void intercept(String name, Context context) {
 		 try {
-			 Class<IModule>[] inters = (Class<IModule>[]) Class.forName("com.example.binghu.router.module.ModuleA").getSuperclass().getInterfaces();
-			 Log.e(TAG, "boolean " + inters[0].newInstance().interceptor());
-			 Type[] types = Class.forName("com.example.binghu.router.module.ModuleA").getGenericInterfaces();
-		 } catch (Exception e) {
+			 Class clazz = Class.forName(name, false, getClass().getClassLoader());
+			 IModule module = (IModule) clazz.newInstance();
+			 boolean result = module.intercept(context);
+			 Log.e("RESULT", " result ==> " + result);
+
+//			 Method method = clazz.getDeclaredMethod("intercept", Context.class);
+//			 Object o = method.invoke(clazz.newInstance(), context);
+//			 Log.e("RESULT", " result ==> o " + o);
+		 } catch (ClassNotFoundException e) {
+			 e.printStackTrace();
+		 } catch (InstantiationException e) {
+			 e.printStackTrace();
+		 } catch (IllegalAccessException e) {
 			 e.printStackTrace();
 		 }
-		
+//		 } catch (NoSuchMethodException e) {
+//			 e.printStackTrace();
+//		 } catch (InvocationTargetException e) {
+//			 e.printStackTrace();
+//		 }
+	 }
+
+	 private void handleError() {
+
 	 }
 }
