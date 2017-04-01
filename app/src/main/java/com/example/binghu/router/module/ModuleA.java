@@ -2,16 +2,15 @@ package com.example.binghu.router.module;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.binghu.router.R;
-import com.example.binghu.router.router.AbsModule;
+import com.example.binghu.router.router.AbstractModule;
+import com.example.binghu.router.router.error.RouterErr;
 
-public class ModuleA extends AbsModule implements View.OnClickListener {
+public class ModuleA extends AbstractModule implements View.OnClickListener {
 
 	private EditText etResult;
 
@@ -33,7 +32,7 @@ public class ModuleA extends AbsModule implements View.OnClickListener {
 	}
 	
 	@Override
-	public boolean intercept(Context context) {
-		return true;
+	public int intercept(Context context) {
+		return RouterErr.ERR_MULTI_MATCH;
 	}
 }

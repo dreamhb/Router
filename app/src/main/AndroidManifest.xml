@@ -70,8 +70,7 @@
         </activity>
         <activity
             android:name=".module.ModuleAM"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            >
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -82,6 +81,8 @@
                     android:path="/mPath"
                     android:scheme="m"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".module.Main2Activity">
         </activity>
     </application>
 

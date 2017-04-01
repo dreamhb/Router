@@ -6,8 +6,18 @@ package com.example.binghu.router.router.error;
 
 public class RouterErr {
 
+	public static final int OK = 0x0;
+	public static final int ERR_URL_INVALID = 0x1;
+	public static final int ERR_NO_MATCH_PAGE = 0x2;
+	public static final int ERR_MULTI_MATCH = 0x3;
+
 	private int errCode;
 	private String errMsg;
+
+	public RouterErr(int errCode, String errMsg) {
+		this.errCode = errCode;
+		this.errMsg = errMsg;
+	}
 
 	public int getErrCode() {
 		return errCode;

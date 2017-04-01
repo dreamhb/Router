@@ -7,9 +7,10 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import com.example.binghu.router.router.error.RouterErr;
+
 import java.util.List;
 import java.util.Map;
 
@@ -30,17 +31,23 @@ public enum Router implements IRouter {
 	static final int REQUEST_CODE_GET_RESULT = 0x3000;
 
 	/**
+	 * 实例化后的module
+	 */
+	private IModule iModule;
+
+	/**
 	 * 动态匹配模块名和类名
+	 *
 	 * @param origin
 	 * @return
 	 */
 	private Uri getUri(Uri origin) {
 		if (serverRouterMap != null) {
 			//get module
-			String module = serverRouterMap.get(origin.getHost()) == null ? origin.getHost():
+			String module = serverRouterMap.get(origin.getHost()) == null ? origin.getHost() :
 					serverRouterMap.get(origin.getHost());
 			//get class
-			String clazz = serverRouterMap.get(origin.getPath()) == null ? origin.getPath():
+			String clazz = serverRouterMap.get(origin.getPath()) == null ? origin.getPath() :
 					serverRouterMap.get(origin.getPath());
 
 			return new Uri.Builder()
@@ -80,8 +87,9 @@ public enum Router implements IRouter {
 
 	/**
 	 * open url
+	 *
 	 * @param context
-	 * @param url schema://host/path?params#fragment
+	 * @param url     schema://host/path?params#fragment
 	 */
 	@Override
 	public void open(Context context, String url) {
@@ -91,6 +99,7 @@ public enum Router implements IRouter {
 
 	/**
 	 * open url with resultCallback
+	 *
 	 * @param context
 	 * @param url
 	 * @param resultCallback callback for get result
@@ -104,36 +113,40 @@ public enum Router implements IRouter {
 
 		this.resultCallback = resultCallback;
 
-		intercept(getModuleFullName(url, context), context.getApplicationContext());
+		boolean result = intercept(getModuleFullName(url, context), context.getApplicationContext());
 
-//		Uri uri = Uri.parse(url);
-//		Uri handledUri = getUri(uri);
-//
-//		// ----------JUMP---------------------------------
-//		if (null != resultCallback) {
-//			startRouterActivity(context, handledUri);
-//		} else {
-//			Intent intent = new Intent(Intent.ACTION_MAIN);
-//			intent.setData(handledUri);
-//			context.startActivity(intent);
-//		}
+		if (result) {
+			Uri uri = Uri.parse(url);
+			Uri handledUri = getUri(uri);
+
+			if (null != resultCallback) {
+				startRouterActivity(context, handledUri);
+			} else {
+				Intent intent = new Intent(Intent.ACTION_MAIN);
+				intent.setData(handledUri);
+				context.startActivity(intent);
+			}
+		}
 	}
 
 
 	/**
 	 * check url validity
+	 *
 	 * @param url
 	 * @return
 	 */
 	private boolean checkUrl(String url, Context context) {
 		if (TextUtils.isEmpty(url)) {
 			Log.e(TAG, " url must not empty !");
+			handleError(context, new RouterErr(RouterErr.ERR_URL_INVALID, "URL INVALID"));
 			return false;
 		}
 
-		if(!checkMatchModule(url, context)) {
-			//// TODO: 3/13/17 goto 404 page 
+		if (!checkMatchModule(url, context)) {
+			//// TODO: 3/13/17 goto 404 page
 			Log.e(TAG, " url is invalid or the module you called is not ready !");
+			handleError(context, new RouterErr(RouterErr.ERR_NO_MATCH_PAGE, "NO PAGE MATCH"));
 			return false;
 		}
 		return true;
@@ -142,6 +155,7 @@ public enum Router implements IRouter {
 
 	/**
 	 * check whether has matched activity for the url
+	 *
 	 * @param url
 	 * @return
 	 */
@@ -161,6 +175,7 @@ public enum Router implements IRouter {
 
 	/**
 	 * start activity to get result
+	 *
 	 * @param context
 	 */
 	private void startRouterActivity(Context context, Uri uri) {
@@ -173,6 +188,7 @@ public enum Router implements IRouter {
 
 	/**
 	 * handle result from activity
+	 *
 	 * @param requestCode
 	 * @param resultCode
 	 * @param data
@@ -186,7 +202,6 @@ public enum Router implements IRouter {
 	}
 
 	/**
-	 *
 	 * @param url
 	 * @param context
 	 * @return
@@ -202,52 +217,70 @@ public enum Router implements IRouter {
 		Intent intent = new Intent();
 		intent.setData(moduleUri);
 
-		//// TODO: 3/30/17  add for test 
-		context.startActivity(intent);
-		
 		PackageManager pm = context.getPackageManager();
 		List<ResolveInfo> rls = pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
 
 		if (null == rls || rls.size() == 0) {
-			//// TODO: 3/30/17 error handler
-			handleError();
-		} else if (rls.size() > 1){
-			handleError();
+			handleError(context, new RouterErr(RouterErr.ERR_NO_MATCH_PAGE, "NO MATCH"));
+		} else if (rls.size() > 1) {
+			handleError(context, new RouterErr(RouterErr.ERR_MULTI_MATCH, "MULTI MATCH"));
 		} else {
 			ResolveInfo ri = rls.get(0);
-			String fullName = ri.activityInfo.name;
-			return fullName;
+			return ri.activityInfo.name;
 		}
 
 		return "";
-	 }
+	}
 
 
-	 private void intercept(String name, Context context) {
-		 try {
-			 Class clazz = Class.forName(name, false, getClass().getClassLoader());
-			 IModule module = (IModule) clazz.newInstance();
-			 boolean result = module.intercept(context);
-			 Log.e("RESULT", " result ==> " + result);
+	/**
+	 * @param name
+	 * @param context
+	 */
+	private boolean intercept(String name, Context context) {
+		try {
+			Class clazz = Class.forName(name, false, getClass().getClassLoader());
+			iModule = (IModule) clazz.newInstance();
+			int errCode = iModule.intercept(context);
+			if (errCode == RouterErr.OK) {
+				return true;
+			} else {
+				handleError(context, new RouterErr(errCode, ""));
+			}
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
 
-//			 Method method = clazz.getDeclaredMethod("intercept", Context.class);
-//			 Object o = method.invoke(clazz.newInstance(), context);
-//			 Log.e("RESULT", " result ==> o " + o);
-		 } catch (ClassNotFoundException e) {
-			 e.printStackTrace();
-		 } catch (InstantiationException e) {
-			 e.printStackTrace();
-		 } catch (IllegalAccessException e) {
-			 e.printStackTrace();
-		 }
-//		 } catch (NoSuchMethodException e) {
-//			 e.printStackTrace();
-//		 } catch (InvocationTargetException e) {
-//			 e.printStackTrace();
-//		 }
-	 }
+		return false;
+	}
 
-	 private void handleError() {
+	/**
+	 * error handle
+	 * base error handle in {@link AbstractModule}
+	 * if you need handle module specified error
+	 * please override {@link AbstractModule#handleError(Context, RouterErr)}
+	 * @param routerErr
+	 */
+	private void handleError(Context context, RouterErr routerErr) {
+		if (iModule != null) {
+			iModule.handleError(context, routerErr);
+		} else {
+			handleBaseError(context, routerErr);
+		}
+	}
 
-	 }
+
+	/**
+	 * 基本错误可以放在这里，如果需要模块处理的话，就需要实例化模块
+	 * 看如何取舍吧
+	 * @param context
+	 * @param routerErr
+	 */
+	private void handleBaseError(Context context, RouterErr routerErr) {
+		Toast.makeText(context, routerErr.getErrMsg(), Toast.LENGTH_SHORT).show();
+	}
 }
